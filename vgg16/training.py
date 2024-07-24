@@ -14,8 +14,13 @@ train_datagen = ImageDataGenerator(
     rescale=1. / 255,
     shear_range=0.2,
     zoom_range=0.2,
-    horizontal_flip=True)
-
+    horizontal_flip=True,
+    rotation_range=30,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
+    brightness_range=[0.8, 1.2],
+    channel_shift_range=0.2,
+    fill_mode='nearest')
 
 train_generator = train_datagen.flow_from_directory(
     train_data_dir,
