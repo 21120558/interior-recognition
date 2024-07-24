@@ -1,3 +1,4 @@
+import json
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from model import VGG16_Places365
@@ -54,5 +55,9 @@ model.fit(
     callbacks=callbacks)
 
 model.save('vgg16_places365_finetuned_final.keras')
+
+class_indices = train_generator.class_indices
+with open('class_indices.json', 'w') as f:
+    json.dump(class_indices, f)
 
 
