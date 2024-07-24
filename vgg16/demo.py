@@ -1,3 +1,4 @@
+import json
 import os
 import numpy as np
 from tensorflow.keras.models import load_model
@@ -7,10 +8,13 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 train_data_dir = '../data/train'
 model_path = 'vgg16_places365_finetuned_final.keras'
+class_indices_path = 'class_indices.json'
+
 
 model = load_model(model_path)
 
 feature_extractor = Model(inputs=model.input, outputs=model.layers[-3].output)  # Lớp GlobalAveragePooling2D
+
 
 def load_and_preprocess_image(img_path, target_size=(224, 224)):
     img = load_img(img_path, target_size=target_size)
@@ -19,10 +23,15 @@ def load_and_preprocess_image(img_path, target_size=(224, 224)):
     img_array /= 255.0  # Rescale
     return img_array
 
+with open(class_indices_path, 'r') as f:
+    class_indices = json.load(f)
+class_indices = {int(v): k for k, v in class_indices.items()}
+    
+
 input_image_path = '../data/test/U/image_7.png'
 input_image = load_and_preprocess_image(input_image_path)
 predicted_class = np.argmax(model.predict(input_image))
-class_indices = {v: k for k, v in train_generator.class_indices.items()}
+
 predicted_class_name = class_indices[predicted_class]
 print(f"Predicted class: {predicted_class_name}")
 
