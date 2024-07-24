@@ -1,6 +1,6 @@
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-from mode import VGG16_Places365
+from vgg16.model import VGG16_Places365
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 train_data_dir = '../data/train'
