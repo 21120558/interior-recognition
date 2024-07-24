@@ -1,5 +1,8 @@
 import json
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from sklearn.utils.class_weight import compute_class_weight
+import numpy as np
+
 
 from model import VGG16_Places365
 from keras.callbacks import ModelCheckpoint, EarlyStopping
@@ -27,6 +30,12 @@ train_generator = train_datagen.flow_from_directory(
     target_size=(img_width, img_height),
     batch_size=batch_size,
     class_mode='categorical')
+
+class_weights = compute_class_weight(
+    'balanced',
+    classes=np.unique(train_generator.classes),
+    y=train_generator.classes)
+class_weights = dict(enumerate(class_weights))
 
 
 from keras.layers import Dense, GlobalAveragePooling2D
@@ -56,7 +65,10 @@ callbacks = [checkpoint, early_stopping]
 model.fit(
     train_generator,
     steps_per_epoch=train_generator.samples // batch_size,
-    epochs=300,
+    validation_data=train_generator,  
+    validation_steps=train_generator.samples // train_generator.batch_size,
+    epochs=200,
+    class_weight=class_weights,
     callbacks=callbacks)
 
 model.save('vgg16_places365_finetuned_final.keras')
