@@ -1,6 +1,6 @@
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-from vgg16.model import VGG16_Places365
+from model import VGG16_Places365
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 train_data_dir = '../data/train'
@@ -21,7 +21,6 @@ train_generator = train_datagen.flow_from_directory(
     target_size=(img_width, img_height),
     batch_size=batch_size,
     class_mode='categorical')
-
 
 
 from keras.layers import Dense, GlobalAveragePooling2D
@@ -51,7 +50,7 @@ callbacks = [checkpoint, early_stopping]
 model.fit(
     train_generator,
     steps_per_epoch=train_generator.samples // batch_size,
-    epochs=50,
+    epochs=300,
     callbacks=callbacks)
 
 model.save('vgg16_places365_finetuned_final.keras')
