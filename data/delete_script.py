@@ -38,17 +38,22 @@ for cls in classes:
     os.makedirs(os.path.join(test_dir, cls), exist_ok=True)
 
 # Tỷ lệ chia dữ liệu train và test
-train_ratio = 0.9
+train_ratio = 1
 
 # Hàm di chuyển tệp hình ảnh vào thư mục đích
 def move_images(filename, class_name, src_dir, train_dest_dir, test_dest_dir):
     src_path = os.path.join(src_dir, filename)
     if os.path.exists(src_path):
+        img = preprocess_image_with_padding(src_path)
+
+        if filename.lower().endswith('.webp'):
+            filename = filename.rsplit('.', 1)[0] + '.jpg'
+
         if random.random() < train_ratio:
             dst_path = os.path.join(train_dest_dir, class_name, filename)
         else:
             dst_path = os.path.join(test_dest_dir, class_name, filename)
-        shutil.move(src_path, dst_path)
+        cv2.imwrite(dst_path, img)
         print(f'Moved {filename} to {dst_path}')
 
 # Duyệt qua các ảnh trong thư mục image và di chuyển vào thư mục tương ứng
