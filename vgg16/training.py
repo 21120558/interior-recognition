@@ -11,7 +11,7 @@ train_data_dir = '../data/train'
 validation_data_dir = '../data/test'
 
 img_width, img_height = 224, 224
-batch_size = 8
+batch_size = 32
 
 train_datagen = ImageDataGenerator(
     rescale=1. / 255,
@@ -54,6 +54,9 @@ model = Model(inputs=base_model.input, outputs=predictions)
 for layer in base_model.layers:
     layer.trainable = False
 
+for layer in base_model.layers[-1:]:  
+    layer.trainable = True
+
 model.compile(optimizer=Adam(learning_rate=0.0001), loss='categorical_crossentropy', metrics=['accuracy'])
 
 
@@ -65,8 +68,6 @@ callbacks = [checkpoint, early_stopping]
 model.fit(
     train_generator,
     steps_per_epoch=train_generator.samples // batch_size,
-    validation_data=train_generator,  
-    validation_steps=train_generator.samples // train_generator.batch_size,
     epochs=200,
     class_weight=class_weights,
     callbacks=callbacks)
