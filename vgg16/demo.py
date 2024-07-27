@@ -16,6 +16,21 @@ model = load_model(model_path)
 
 feature_extractor = Model(inputs=model.input, outputs=model.layers[-3].output)  # Lớp GlobalAveragePooling2D
 
+def preprocess_image_with_padding(img_path, target_size=(224, 224)):
+    img = cv2.imread(img_path)
+    old_size = img.shape[:2]
+
+    ratio = float(target_size[0]) / max(old_size)
+    new_size = tuple([int(x * ratio) for x in old_size])
+
+    img = cv2.resize(img, (new_size[1], new_size[0]))
+
+    new_img = np.full((target_size[0], target_size[1], 3), 255, dtype=np.uint8)
+    new_img[(target_size[0] - new_size[0]) // 2:(target_size[0] - new_size[0]) // 2 + new_size[0],
+            (target_size[1] - new_size[1]) // 2:(target_size[1] - new_size[1]) // 2 + new_size[1]] = img
+
+    return new_img
+
 
 def load_and_preprocess_image(img_path, target_size=(224, 224)):
     img = load_img(img_path, target_size=target_size)
@@ -43,7 +58,7 @@ def predict(input_image_path):
     class_dir = os.path.join(train_data_dir, predicted_class_name)
 
     for img_name in os.listdir(class_dir):
-        if img_name.lower().endswith(('png', 'jpg', 'jpeg')):
+        if img_name.lower().endswith(('png', 'jpg', 'jpeg', 'webp')) and os.path.join(class_dir, img_name) != input_image_path:
             img_path = os.path.join(class_dir, img_name)
             img = load_and_preprocess_image(img_path)
             feature = feature_extractor.predict(img)
@@ -53,10 +68,12 @@ def predict(input_image_path):
     features = np.vstack(features)
 
     similarities = cosine_similarity(input_feature, features)
-    most_similar_index = np.argmax(similarities)
-    most_similar_image_path = image_paths[most_similar_index]
+    most_similar_indices = np.argsort(similarities[0])[-3:][::-1]
+    most_similar_image_paths = [image_paths[i] for i in most_similar_indices]
 
-    print(f"The most similar image in class {predicted_class_name} is: {most_similar_image_path}")
+    for i, path in enumerate(most_similar_image_paths):
+        print(f"The {i+1} most similar image in class {predicted_class_name} is: {path}")
+
 
 if __name__ == '__main__':
 
